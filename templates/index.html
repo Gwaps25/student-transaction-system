@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Transaction Number</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: url('https://i.postimg.cc/0yBnHzZj/cspc.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      padding: 20px;
+    }
+    h1 { font-size: 2.5em; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+    .welcome-text { font-size: 3em; font-weight: bold; text-shadow: 3px 3px 10px rgba(0,0,0,0.7); color: yellow; margin-bottom: 20px; }
+    label { font-size: 1.2em; font-weight: bold; display: block; margin-top: 15px; }
+    input {
+      padding: 12px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      width: 80%;
+      max-width: 300px;
+      display: block;
+      margin: 10px auto;
+      text-align: center;
+    }
+    .btn {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      width: 200px;
+      margin: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: bold;
+    }
+    .cashier-btn { background: #ff5733; color: white; }
+    .registrar-btn { background: #33c4ff; color: white; }
+    .selected { background: gray !important; }
+    .btn:hover { opacity: 0.8; }
+    .error { color: #ffcc00; }
+    .success { color: #00ffcc; }
+    .get-tn-btn {
+      background: #4CAF50;
+      color: white;
+      margin-top: 20px;
+      display: block;
+      width: 250px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .tn-box {
+      margin-top: 20px;
+      font-size: 2em;
+      font-weight: bold;
+      background: rgba(255,255,255,0.9);
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      width: 50%;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      display: none;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-text">Hi CSPC'eans! 🎉</div>
+  <h1>🎓 Get Your Transaction Number</h1>
+  <label for="student-id">Please enter your Student ID:</label>
+  <input type="text" id="student-id" placeholder="Enter Student ID" oninput="resetButtonColor()">
+  <div>
+    <button class="btn cashier-btn" onclick="selectDepartment('cashier')">Cashier</button>
+    <button class="btn registrar-btn" onclick="selectDepartment('registrar')">Registrar</button>
+  </div>
+  <button class="btn get-tn-btn" onclick="getTransactionNumber()">Get your Transaction Number Here</button>
+  <div id="tn-box" class="tn-box"></div>
+  
+  <script>
+    let selectedDepartment = null;
+    let selectedButton = null;
+    let resetTimeout = null;
+
+    function selectDepartment(department) {
+      selectedDepartment = department;
+      document.querySelector(".cashier-btn").classList.remove("selected");
+      document.querySelector(".registrar-btn").classList.remove("selected");
+      selectedButton = document.querySelector(`.${department}-btn`);
+      selectedButton.classList.add("selected");
+      if (resetTimeout) clearTimeout(resetTimeout);
+      resetTimeout = setTimeout(() => { selectedButton.classList.remove("selected"); }, 3000);
+    }
+
+    function resetButtonColor() {
+      if (selectedButton) {
+        selectedButton.classList.remove("selected");
+      }
+    }
+
+    function getTransactionNumber() {
+      const studentId = document.getElementById("student-id").value;
+      const tnBox = document.getElementById("tn-box");
+
+      if (!studentId) {
+        tnBox.innerHTML = "<span class='error'>Please enter your Student ID.</span>";
+        tnBox.style.display = "block";
+        return;
+      }
+
+      if (!selectedDepartment) {
+        tnBox.innerHTML = "<span class='error'>Please select Cashier or Registrar.</span>";
+        tnBox.style.display = "block";
+        return;
+      }
+
+      fetch("/get_number", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: studentId, department: selectedDepartment })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          tnBox.innerHTML = `<span class='error'>${data.error}</span>`;
+        } else {
+          tnBox.innerHTML = `<span class='success'>Your transaction number on ${selectedDepartment} is <br><span style="font-size: 3em; color: blue;">${data.transaction_number}</span></span>`;
+        }
+        tnBox.style.display = "block";
+      })
+      .catch(() => {
+        tnBox.innerHTML = "<span class='error'>Server error. Please try again later.</span>";
+        tnBox.style.display = "block";
+      });
+    }
+  </script>
+</body>
+</html>
