@@ -1,69 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cashier Monitoring</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
-        h1 { color: #005f9e; }
-        .queue-container { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
-        .queue { background: white; padding: 15px; border-radius: 8px; width: 40%; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); }
-        h2 { color: #333; }
-        ul { list-style: none; padding: 0; }
-        li { background: #e0e0e0; padding: 10px; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        button { padding: 8px 12px; font-size: 14px; cursor: pointer; border: none; border-radius: 5px; background-color: #28a745; color: white; }
-        button:hover { background-color: #218838; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashier Monitoring</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
+    h1 { color: #005f9e; }
+    .queue-container { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+    .queue { background: white; padding: 15px; border-radius: 8px; width: 40%; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+    h2 { color: #333; }
+    ul { list-style: none; padding: 0; }
+    li { background: #e0e0e0; padding: 10px; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+    button { padding: 8px 12px; font-size: 14px; cursor: pointer; border: none; border-radius: 5px; background-color: #28a745; color: white; }
+    button:hover { background-color: #218838; }
+  </style>
 </head>
 <body>
-    <h1>📋 Cashier Monitoring Page</h1>
-
-    <div class="queue-container">
-        <div class="queue">
-            <h2>🏦 Cashier Queue</h2>
-            <ul id="cashier-list">Loading...</ul>
-            <button onclick="nextNumber('cashier')">Next</button>
-        </div>
-        <div class="queue">
-            <h2>📜 Registrar Queue</h2>
-            <ul id="registrar-list">Loading...</ul>
-            <button onclick="nextNumber('registrar')">Next</button>
-        </div>
+  <h1>📋 Cashier Monitoring Page</h1>
+  <div class="queue-container">
+    <div class="queue">
+      <h2>🏦 Cashier Queue</h2>
+      <ul id="cashier-list">Loading...</ul>
+      <button onclick="nextNumber('cashier')">Next</button>
     </div>
-
-    <script>
-        function updateQueue() {
-            fetch("/queue_data")
-                .then(response => response.json())
-                .then(data => {
-                    const cashierList = document.getElementById("cashier-list");
-                    const registrarList = document.getElementById("registrar-list");
-
-                    cashierList.innerHTML = "";
-                    registrarList.innerHTML = "";
-
-                    data.cashier.forEach(entry => {
-                        const li = document.createElement("li");
-                        li.textContent = `Student ID: ${entry.id} - TN: ${entry.number}`;
-                        cashierList.appendChild(li);
-                    });
-
-                    data.registrar.forEach(entry => {
-                        const li = document.createElement("li");
-                        li.textContent = `Student ID: ${entry.id} - TN: ${entry.number}`;
-                        registrarList.appendChild(li);
-                    });
-                });
-        }
-
-        function nextNumber(department) {
-            fetch(`/next_number?department=${department}`, { method: "POST" })
-                .then(response => response.json())
-                .then(data => { alert(data.message); updateQueue(); });
-        }
-
-        setInterval(updateQueue, 5000);
-    </script>
+    <div class="queue">
+      <h2>📜 Registrar Queue</h2>
+      <ul id="registrar-list">Loading...</ul>
+      <button onclick="nextNumber('registrar')">Next</button>
+    </div>
+  </div>
+  <script>
+    function updateQueue() {
+      fetch("/queue_data")
+        .then(response => response.json())
+        .then(data => {
+          const cashierList = document.getElementById("cashier-list");
+          const registrarList = document.getElementById("registrar-list");
+          cashierList.innerHTML = "";
+          registrarList.innerHTML = "";
+          data.cashier.forEach(entry => {
+            const li = document.createElement("li");
+            li.textContent = `Student ID: ${entry.id} - TN: ${entry.number}`;
+            cashierList.appendChild(li);
+          });
+          data.registrar.forEach(entry => {
+            const li = document.createElement("li");
+            li.textContent = `Student ID: ${entry.id} - TN: ${entry.number}`;
+            registrarList.appendChild(li);
+          });
+        });
+    }
+    
+    function nextNumber(department) {
+      fetch(`/next_number?department=${department}`, { method: "POST" })
+        .then(response => response.json())
+        .then(data => { alert(data.message); updateQueue(); });
+    }
+    
+    // Refresh the queue every 5 seconds
+    setInterval(updateQueue, 5000);
+  </script>
 </body>
 </html>
